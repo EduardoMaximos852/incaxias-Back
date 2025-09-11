@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+
+
+
 //Database connection
 $host = "localhost";
 $user = "root";
@@ -28,9 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     if ($result->num_rows === 1) {
         $row = $result->fetch_assoc();
         if (password_verify($senha, $row['senha'])) {
-            $_SESSION['usuario_id'] = $row['id'];
-            $_SESSION['usuario_nome'] = $row['nome'];
+            $_SESSION['usuario_id']    = $row['id'];
+            $_SESSION['usuario_nome']  = $row['nome'];
+            $_SESSION['usuario_email'] = $row['email'];
             $_SESSION['usuario_nivel'] = $row['nivel'];
+
             header("Location: dashboard.php");
             exit();
         } else {

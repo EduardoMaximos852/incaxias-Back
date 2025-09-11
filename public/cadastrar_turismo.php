@@ -9,7 +9,6 @@ if ($conn->connect_error) die("Erro na conexão: " . $conn->connect_error);
 
 $msg = '';
 
-// Inserção do ponto turístico
 if (isset($_POST['cadastrar'])) {
     $nome = $_POST['nome'];
     $descricao = $_POST['descricao'];
@@ -70,27 +69,9 @@ $res = $conn->query("SELECT * FROM turismo ORDER BY criado_em DESC");
         }
 
         h2 {
-            margin-bottom: 20px;
-            text-align: center;
+            margin-bottom: 20px
         }
 
-        a.back-btn {
-            display: inline-block;
-            padding: 10px 18px;
-            border-radius: 10px;
-            background: linear-gradient(90deg, var(--purple-600), var(--purple-500));
-            color: white;
-            font-weight: 600;
-            text-decoration: none;
-            transition: 0.3s;
-            margin-bottom: 20px;
-        }
-
-        a.back-btn:hover {
-            opacity: 0.9
-        }
-
-        /* Formulário */
         form {
             background: var(--panel);
             padding: 20px;
@@ -131,23 +112,18 @@ $res = $conn->query("SELECT * FROM turismo ORDER BY criado_em DESC");
         .success {
             color: var(--green-500);
             margin-bottom: 10px;
-            text-align: center;
         }
 
         .error {
             color: #f87171;
-            margin-bottom: 10px;
-            text-align: center;
+            margin-bottom: 10px
         }
 
         /* Tabela estilo dashboard */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 40px;
-            background: var(--panel);
-            border-radius: var(--radius);
-            overflow: hidden;
+            margin-top: 20px;
         }
 
         th,
@@ -162,31 +138,27 @@ $res = $conn->query("SELECT * FROM turismo ORDER BY criado_em DESC");
             color: var(--muted);
             font-size: 13px;
         }
-
-        img {
-            border-radius: 8px;
-        }
-
-        @media (max-width:768px) {
-            form {
-                padding: 15px;
-            }
-
-            table,
-            th,
-            td {
-                font-size: 12px;
-            }
-        }
     </style>
 </head>
 
 <body>
 
     <!-- Botão voltar -->
-    <div style="max-width:600px; margin:auto 0 20px 0; text-align:left;">
-        <a href="dashboard.php" class="back-btn">← Voltar ao Dashboard</a>
+    <div style="max-width:600px; margin:auto 0 20px 0; text-align:right;">
+        <a href="dashboard.php" style="
+        display:inline-block;
+        padding:8px 15px;
+        border-radius:10px;
+        background:linear-gradient(90deg,var(--purple-600),var(--purple-500));
+        color:white;
+        font-weight:600;
+        text-decoration:none;
+        transition:0.3s;
+    ">← Voltar ao Dashboard</a>
     </div>
+
+
+
 
     <h2>Cadastrar Ponto Turístico</h2>
     <?php echo $msg; ?>
@@ -209,7 +181,29 @@ $res = $conn->query("SELECT * FROM turismo ORDER BY criado_em DESC");
         <button type="submit" name="cadastrar">Cadastrar</button>
     </form>
 
-
+    <h2 style="margin-top:40px;">Pontos Turísticos Cadastrados</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Endereço</th>
+                <th>Categoria</th>
+                <th>Imagem</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php while ($row = $res->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo $row['nome']; ?></td>
+                    <td><?php echo $row['descricao']; ?></td>
+                    <td><?php echo $row['endereco']; ?></td>
+                    <td><?php echo $row['categoria']; ?></td>
+                    <td><?php if ($row['imagem']) echo "<img src='uploads/" . $row['imagem'] . "' width='60'>"; ?></td>
+                </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
 
 </body>
 

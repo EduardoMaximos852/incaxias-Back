@@ -1,9 +1,8 @@
-
 <aside class="sidebar">
     <div class="brand">
         <div class="logo">IC</div>
         <div>
-            
+
             <h1>InCaxias</h1>
             <p>Admin Panel</p>
         </div>
@@ -11,8 +10,10 @@
 
     <nav class="nav">
         <a href="dashboard.php" class="active">Home</a>
-        <a href="turismo.php">Turismo</a>
-        <a href="usuarios.php">Usuários</a>
+        <a href="Turismo.php">Turismo</a>
+        <a href="Cultura.php">Cultura</a>
+        <a href="Comércio.php">Comércio</a>
+        <a href="Usuarios.php">Usuários</a>
     </nav>
 
     <div class="footer">
