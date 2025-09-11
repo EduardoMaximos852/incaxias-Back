@@ -8,8 +8,21 @@ $db   = "dbincaxias";
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) die("Erro na conexão: " . $conn->connect_error);
 
-// Verifica conexão
-if (!$conn) die("Falha na conexão: " . mysqli_connect_error());
+$local = $_GET['local'] ?? '';
+
+// Agora você pode continuar usando $local
+if ($local !== '') {
+
+    $stmt = $conn->prepare("SELECT * FROM cultura WHERE local = ?");
+    $stmt->bind_param("s", $local);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $cultura = $res->fetch_assoc();
+    $stmt->close();
+} else {
+    $cultura = null;
+}
+
 
 // Verifica login
 if (!isset($_SESSION['usuario_id'])) {
@@ -180,8 +193,8 @@ function contar($conn, $tabela)
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Categoria</th>
-                            <th>Local</th>
-                            <th>Imagem</th>
+                            <th>descricao</th>
+                            <th>Endereco</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -193,8 +206,10 @@ function contar($conn, $tabela)
                                 <td><?php echo $c['id']; ?></td>
                                 <td><?php echo htmlspecialchars($c['nome']); ?></td>
                                 <td><?php echo htmlspecialchars($c['categoria']); ?></td>
-                                <td><?php echo htmlspecialchars($c['local']); ?></td>
-                                <td><?php if ($c['imagem']): ?><img src="modulos/uploads/<?php echo $c['imagem']; ?>"><?php endif; ?></td>
+                                <td><?php echo htmlspecialchars($c['descricao']); ?></td>
+                                <td><?php echo htmlspecialchars($c['endereco']); ?></td>
+
+                                <td></td>
                             </tr>
                         <?php endwhile; ?>
                     </tbody>

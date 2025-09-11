@@ -10,10 +10,10 @@
 
     <nav class="nav">
         <a href="dashboard.php" class="active">Home</a>
-        <a href="Turismo.php">Turismo</a>
-        <a href="Cultura.php">Cultura</a>
-        <a href="Comércio.php">Comércio</a>
-        <a href="Usuarios.php">Usuários</a>
+        <a href="turismo.php">Turismo</a>
+        <a href="cadastrar_cultura.php">Cultura</a>
+        <a href="cadastrar_comercio.php">Comércio</a>
+        <a href="usuarios.php">Usuários</a>
     </nav>
 
     <div class="footer">

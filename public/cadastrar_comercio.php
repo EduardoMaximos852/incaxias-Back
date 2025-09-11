@@ -1,4 +1,9 @@
 <?php
+session_start();
+
+
+$uploadDir = __DIR__ . '/../uploads/';
+
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -7,42 +12,47 @@ $db   = "dbincaxias";
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) die("Erro na conexão: " . $conn->connect_error);
 
+
+
+
 $msg = '';
 
-if (isset($_POST['cadastrar'])) {
-    $nome = $_POST['nome'];
-    $descricao = $_POST['descricao'];
-    $endereco = $_POST['endereco'];
-    $categoria = $_POST['categoria'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nome       = trim($_POST['nome']);
+    $descricao  = trim($_POST['descricao']);
+    $endereco   = trim($_POST['endereco']);
+    $contato    = trim($_POST['contato']); // <- novo campo
+    $categoria  = trim($_POST['categoria']);
+    $imagemNome = '';
 
-    $imagem = '';
-    if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] == 0) {
-        $imagem = time() . '_' . basename($_FILES['imagem']['name']);
-        move_uploaded_file($_FILES['imagem']['tmp_name'], 'uploads/' . $imagem);
+    if (!empty($_FILES['imagem']['name'])) {
+        $dirUpload = __DIR__ . '/../uploads/';
+        if (!is_dir($dirUpload)) mkdir($dirUpload, 0777, true);
+        $imagemNome = time() . '_' . basename($_FILES['imagem']['name']);
+        move_uploaded_file($_FILES['imagem']['tmp_name'], $dirUpload . $imagemNome);
     }
 
-    $stmt = $conn->prepare("INSERT INTO turismo (nome, descricao, endereco, imagem, categoria, criado_em, atualizado_em) VALUES (?, ?, ?, ?, ?, NOW(), NOW())");
-    $stmt->bind_param("sssss", $nome, $descricao, $endereco, $imagem, $categoria);
+    $stmt = $conn->prepare(
+        "INSERT INTO comercio (nome, descricao, endereco, contato, imagem, categoria, criado_em)
+         VALUES (?,?,?,?,?,?,NOW())"
+    );
+    $stmt->bind_param('ssssss', $nome, $descricao, $endereco, $contato, $imagemNome, $categoria);
 
     if ($stmt->execute()) {
-        $msg = "<div class='success'>Ponto turístico cadastrado com sucesso!</div>";
+        $msg = "<div class='alert success'>Cadastro realizado com sucesso!</div>";
     } else {
-        $msg = "<div class='error'>Erro ao cadastrar: " . $conn->error . "</div>";
+        $msg = "<div class='alert error'>Erro ao cadastrar: " . $stmt->error . "</div>";
     }
-    $stmt->close();
 }
-
-// Buscar todos os pontos turísticos
-$res = $conn->query("SELECT * FROM turismo ORDER BY criado_em DESC");
 ?>
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar Ponto Turístico</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cadastrar Comércio</title>
+    <link rel="stylesheet" href="../assets/incaxias.css"> <!-- mesmo CSS global -->
     <style>
         :root {
             --bg: #0f0b13;
@@ -140,10 +150,10 @@ $res = $conn->query("SELECT * FROM turismo ORDER BY criado_em DESC");
             font-size: 13px;
         }
     </style>
+
 </head>
 
 <body>
-
     <!-- Botão voltar -->
     <div style="max-width:600px; margin:auto 0 20px 0; text-align:right;">
         <a href="dashboard.php" style="
@@ -158,54 +168,33 @@ $res = $conn->query("SELECT * FROM turismo ORDER BY criado_em DESC");
     ">← Voltar ao Dashboard</a>
     </div>
 
-    <div class="container">
-        <h2>Cadastrar Ponto Turístico</h2>
-        <?php echo $msg; ?>
 
-        <form method="POST" enctype="multipart/form-data">
-            <label>Nome:</label>
-            <input type="text" name="nome" required>
+    <h2>Cadastrar Comércio</h2>
+    <?= $msg ?>
 
-            <label>Descrição:</label>
-            <textarea name="descricao" rows="4" required></textarea>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Nome</label>
+        <input type="text" name="nome" required>
 
-            <label>Endereço:</label>
-            <input type="text" name="endereco">
+        <label>Descrição</label>
+        <textarea name="descricao" rows="3" required></textarea>
 
-            <label>Categoria:</label>
-            <input type="text" name="categoria">
+        <label>Endereço</label>
+        <input type="text" name="endereco" required>
 
-            <label>Imagem:</label>
-            <input type="file" name="imagem">
+        <!-- Novo Campo Contato -->
+        <label>Contato</label>
+        <input type="text" name="contato" placeholder="(99) 99999-9999 ou email" required>
 
-            <button type="submit" name="cadastrar">Cadastrar</button>
-        </form>
+        <label>Categoria</label>
+        <input type="text" name="categoria" required>
 
-        <h2 style="margin-top:40px;">Pontos Turísticos Cadastrados</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Descrição</th>
-                    <th>Endereço</th>
-                    <th>Categoria</th>
-                    <th>Imagem</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $res->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo $row['nome']; ?></td>
-                        <td><?php echo $row['descricao']; ?></td>
-                        <td><?php echo $row['endereco']; ?></td>
-                        <td><?php echo $row['categoria']; ?></td>
-                        <td><?php if ($row['imagem']) echo "<img src='uploads/" . $row['imagem'] . "' width='60'>"; ?></td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+        <label>Imagem (opcional)</label>
+        <input type="file" name="imagem" accept="image/*">
+
+        <button class="btn" type="submit">Salvar</button>
+    </form>
     </div>
-
 </body>
 
 </html>
