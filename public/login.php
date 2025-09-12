@@ -67,40 +67,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['senha_master'])) {
 </head>
 
 <body>
+
+
     <div class="login-card card" style="max-width:400px;margin:50px auto;padding:30px;">
         <h2>Login</h2>
         <?php if ($msg): ?>
             <div style="color:red;margin-bottom:10px;"><?php echo $msg; ?></div>
         <?php endif; ?>
 
-        <!-- Formulário login -->
-        <form method="post">
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email" required>
+        <div class="login-container">
+            <div class="logo-incaxias">
+                <img src="../public/images/logo.png" alt="InCaxias Logo" width="300">
             </div>
-            <div class="form-group">
-                <label>Senha</label>
-                <input type="password" name="senha" required>
-            </div>
-            <button type="submit" name="login" class="btn">Entrar</button>
-        </form>
 
-        <hr style="margin:20px 0;">
-
-        <!-- Formulário master -->
-        <?php if (!isset($_SESSION['master_validado'])): ?>
+            <!-- Formulário login -->
             <form method="post">
                 <div class="form-group">
-                    <label>Senha master</label>
-                    <input type="password" name="senha_master">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
                 </div>
-                <button type="submit" class="btn ghost">Validar</button>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" name="senha" required>
+                </div>
+                <button type="submit" name="login" class="btn">Entrar</button>
             </form>
-        <?php else: ?>
-            <a href="cadastrar_usuarios.php" class="btn" style="margin-top:10px;display:block;text-align:center;">Cadastrar Usuário Admin</a>
-        <?php endif; ?>
-    </div>
+
+            <hr style="margin:20px 0;">
+
+            <!-- Formulário master -->
+            <?php if (!isset($_SESSION['master_validado'])): ?>
+                <form method="post">
+                    <div class="form-group">
+                        <label>Senha master</label>
+                        <input type="password" name="senha_master">
+                    </div>
+                    <button type="submit" class="btn ghost">Validar</button>
+                </form>
+            <?php else: ?>
+                <a href="cadastrar_usuarios.php" class="btn" style="margin-top:10px;display:block;text-align:center;">Cadastrar Usuário Admin</a>
+            <?php endif; ?>
+        </div>
 </body>
 
 </html>
