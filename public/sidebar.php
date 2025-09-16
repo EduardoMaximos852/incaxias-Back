@@ -41,7 +41,7 @@
             <li>
                 <a href="visualizar_comercio.php">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M3 7h18v14H3V7z" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M3 7h18v14H3V7z" stroke="#42515DFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         <path d="M3 7l9-4 9 4" stroke="#2196F3" stroke-width="2" stroke-linecap="round" />
                     </svg>
                     Comércio
