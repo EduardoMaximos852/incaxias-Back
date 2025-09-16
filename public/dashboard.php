@@ -55,7 +55,7 @@ if ($modulo === 'turismo_deletar' && isset($_GET['id'])) {
     $id = (int)$_GET['id'];
 
     // Remove imagem do servidor
-    $res = $conn->query("SELECT imagem FROM turismo WHERE id = $id");
+    $res = $conn->query("SELECT ponto_imagens FROM pontos_turisticos WHERE id = $id");
     if ($row = $res->fetch_assoc()) {
         if ($row['imagem'] && file_exists("modulos/uploads/" . $row['imagem'])) {
             unlink("modulos/uploads/" . $row['imagem']);
@@ -63,7 +63,7 @@ if ($modulo === 'turismo_deletar' && isset($_GET['id'])) {
     }
 
     // Deleta registro do banco
-    $stmt = $conn->prepare("DELETE FROM turismo WHERE id=?");
+    $stmt = $conn->prepare("DELETE FROM pontos_turisticos WHERE id=?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $stmt->close();
@@ -150,11 +150,12 @@ if ($modulo === 'turismo_deletar' && isset($_GET['id'])) {
                         <div class="kpi">
                             <div>
                                 <div class="title">Pontos turísticos</div>
-                                <div class="value"><?php echo contar($conn, 'turismo'); ?></div>
+                                <div class="value"><?php echo contar($conn, 'pontos_turisticos'); ?></div>
                             </div>
-                            <div><a href="?modulo=turismo" class="btn">Ver</a></div>
+                            <div><a href="visualizar_turismo.php" class="btn">Ver</a></div>
                         </div>
                     </div>
+
                     <div class="card">
                         <div class="kpi">
                             <div>
@@ -207,7 +208,7 @@ if ($modulo === 'turismo_deletar' && isset($_GET['id'])) {
                                 <div class="title">Cultura</div>
                                 <div class="value"><?php echo contar($conn, 'cultura'); ?></div>
                             </div>
-                            <div><a href="?modulo=cultura" class="btn">Ver</a></div>
+                            <div><a href="visualizar_cultura.php" class="btn">Ver</a></div>
                         </div>
                     </div>
 
@@ -217,7 +218,7 @@ if ($modulo === 'turismo_deletar' && isset($_GET['id'])) {
                                 <div class="title">Comércio</div>
                                 <div class="value"><?php echo contar($conn, 'comercio'); ?></div>
                             </div>
-                            <div><a href="?modulo=comercio" class="btn">Ver</a></div>
+                            <div><a href="visualizar_comercio.php" class="btn">Ver</a></div>
                         </div>
                     </div>
                 </div>
@@ -258,6 +259,7 @@ if ($modulo === 'turismo_deletar' && isset($_GET['id'])) {
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
+                        <div><a href="../public/cadastrar_turismo.php" class="btn">Cadastrar</a></div>
                     <?php endif; ?>
 
                     <!-- Lista de Cultura -->

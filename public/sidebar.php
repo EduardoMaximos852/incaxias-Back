@@ -21,7 +21,7 @@
                 </a>
             </li>
             <li>
-                <a href="?modulo=turismo">
+                <a href="visualizar_turismo.php">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                         <path d="M12 2l7 20H5L12 2z" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         <circle cx="12" cy="15" r="2" fill="#4CAF50" />
@@ -30,7 +30,7 @@
                 </a>
             </li>
             <li>
-                <a href="?modulo=cultura">
+                <a href="visualizar_cultura.php">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                         <path d="M12 3v18M3 12h18" stroke="#FF9800" stroke-width="2" stroke-linecap="round" />
                         <circle cx="12" cy="12" r="6" stroke="#FF9800" stroke-width="2" />
@@ -39,7 +39,7 @@
                 </a>
             </li>
             <li>
-                <a href="?modulo=comercio">
+                <a href="visualizar_comercio.php">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                         <path d="M3 7h18v14H3V7z" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         <path d="M3 7l9-4 9 4" stroke="#2196F3" stroke-width="2" stroke-linecap="round" />

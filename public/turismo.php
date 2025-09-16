@@ -22,7 +22,7 @@ if (isset($_POST['cadastrar'])) {
         move_uploaded_file($_FILES['imagem']['tmp_name'], 'uploads/' . $imagem);
     }
 
-    $stmt = $conn->prepare("INSERT INTO turismo (nome, descricao, endereco, imagem, categoria, criado_em, atualizado_em) VALUES (?, ?, ?, ?, ?, NOW(), NOW())");
+    $stmt = $conn->prepare("INSERT INTO pontos_turisticos (nome, descricao, endereco, imagem, categoria, criado_em, atualizado_em) VALUES (?, ?, ?, ?, ?, NOW(), NOW())");
     $stmt->bind_param("sssss", $nome, $descricao, $endereco, $imagem, $categoria);
 
     if ($stmt->execute()) {
@@ -34,7 +34,7 @@ if (isset($_POST['cadastrar'])) {
 }
 
 // Buscar todos os pontos turísticos
-$res = $conn->query("SELECT * FROM turismo ORDER BY criado_em DESC");
+$res = $conn->query("SELECT * FROM pontos_turisticos ORDER BY id DESC");
 ?>
 
 <!DOCTYPE html>

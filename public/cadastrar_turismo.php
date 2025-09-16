@@ -1,4 +1,5 @@
 <?php
+/* ============ CONFIGURAÇÃO DO BANCO ============ */
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -7,204 +8,200 @@ $db   = "dbincaxias";
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) die("Erro na conexão: " . $conn->connect_error);
 
-$msg = '';
+/* Criação de tabelas */
+$conn->query("
+CREATE TABLE IF NOT EXISTS pontos_turisticos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    descricao TEXT,
+    endereco VARCHAR(255),
+    categoria VARCHAR(100),
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+");
 
-if (isset($_POST['cadastrar'])) {
-    $nome = $_POST['nome'];
-    $descricao = $_POST['descricao'];
-    $endereco = $_POST['endereco'];
-    $categoria = $_POST['categoria'];
+$conn->query("
+CREATE TABLE IF NOT EXISTS ponto_imagens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ponto_id INT NOT NULL,
+    caminho VARCHAR(255) NOT NULL,
+    FOREIGN KEY (ponto_id) REFERENCES pontos_turisticos(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+");
 
-    $imagem = '';
-    if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] == 0) {
-        $imagem = time() . '_' . basename($_FILES['imagem']['name']);
-        move_uploaded_file($_FILES['imagem']['tmp_name'], 'uploads/' . $imagem);
-    }
+/* ============ PROCESSAMENTO DO FORM ============ */
+$mensagem = "";
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nome      = trim($_POST['nome'] ?? '');
+    $descricao = trim($_POST['descricao'] ?? '');
+    $endereco  = trim($_POST['endereco'] ?? '');
+    $categoria = trim($_POST['categoria'] ?? '');
 
-    $stmt = $conn->prepare("INSERT INTO turismo (nome, descricao, endereco, imagem, categoria, criado_em, atualizado_em) VALUES (?, ?, ?, ?, ?, NOW(), NOW())");
-    $stmt->bind_param("sssss", $nome, $descricao, $endereco, $imagem, $categoria);
-
-    if ($stmt->execute()) {
-        $msg = "<div class='success'>Ponto turístico cadastrado com sucesso!</div>";
+    if ($nome === '' || $categoria === '') {
+        $mensagem = "Os campos Nome e Categoria são obrigatórios.";
     } else {
-        $msg = "<div class='error'>Erro ao cadastrar: " . $conn->error . "</div>";
+        $stmt = $conn->prepare(
+            "INSERT INTO pontos_turisticos (nome, descricao, endereco, categoria) VALUES (?, ?, ?, ?)"
+        );
+        $stmt->bind_param("ssss", $nome, $descricao, $endereco, $categoria);
+        if (!$stmt->execute()) {
+            die("Erro ao inserir: " . $stmt->error);
+        } else {
+            echo "Inserido com sucesso!";
+        }
+
+        // Upload das imagens (máx 6)
+        $uploadDir = __DIR__ . "/uploads/pontos/";
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+        if (!empty($_FILES['imagens']['name'][0])) {
+            $total = min(count($_FILES['imagens']['name']), 6);
+            for ($i = 0; $i < $total; $i++) {
+                if ($_FILES['imagens']['error'][$i] === UPLOAD_ERR_OK) {
+                    $ext = pathinfo($_FILES['imagens']['name'][$i], PATHINFO_EXTENSION);
+                    $fileName = time() . "_{$i}." . strtolower($ext);
+                    $destino = $uploadDir . $fileName;
+
+                    if (move_uploaded_file($_FILES['imagens']['tmp_name'][$i], $destino)) {
+                        $stmt = $conn->prepare(
+                            "INSERT INTO ponto_imagens (ponto_id, caminho) VALUES (?, ?)"
+                        );
+                        $stmt->bind_param("is", $ponto_id, $fileName);
+                        $stmt->execute();
+                        $stmt->close();
+                    }
+                }
+            }
+        }
+        $mensagem = "✅ Ponto turístico cadastrado com sucesso!";
     }
-    $stmt->close();
 }
-
-// Buscar todos os pontos turísticos
-$res = $conn->query("SELECT * FROM turismo ORDER BY criado_em DESC");
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar Ponto Turístico</title>
+    <title>Cadastrar Turismo</title>
     <style>
-        :root {
-            --bg: #0f0b13;
-            --panel: #0f1724;
-            --purple-500: #7C3AED;
-            --purple-600: #6B21A8;
-            --green-500: #10B981;
-            --muted: #9AA4B2;
-            --glass: rgba(255, 255, 255, 0.04);
-            --radius: 12px;
-            --card-shadow: 0 6px 18px rgba(11, 8, 20, 0.6);
-        }
-
-        * {
-            box-sizing: border-box
-        }
-
         body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
             margin: 0;
-            font-family: Inter, sans-serif;
-            background: linear-gradient(180deg, #07050a 0%, #0f0b13 100%);
-            color: #E6EDF3;
-            padding: 20px;
+            padding: 40px 0;
         }
 
-        h2 {
-            margin-bottom: 20px;
+        header {
             text-align: center;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .voltar {
+            position: absolute;
+            left: 20px;
+            top: 0;
+            padding: 8px 16px;
+            background: #666;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .voltar:hover {
+            background: #444;
         }
 
         form {
-            background: var(--panel);
-            padding: 20px;
-            border-radius: var(--radius);
-            box-shadow: var(--card-shadow);
-            max-width: 600px;
-            margin: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        input,
-        textarea {
-            padding: 10px;
+            background: #fff;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 25px 30px;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            color: #E6EDF3;
-            font-size: 14px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, .1);
         }
 
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(90deg, var(--purple-600), var(--purple-500));
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
+        form label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
         }
 
-        button:hover {
-            opacity: 0.9
-        }
-
-        .success {
-            color: var(--green-500);
-            margin-bottom: 10px;
-        }
-
-        .error {
-            color: #f87171;
-            margin-bottom: 10px
-        }
-
-        /* Tabela estilo dashboard */
-        table {
+        form input[type="text"],
+        form textarea,
+        form input[type="file"] {
             width: 100%;
-            border-collapse: collapse;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        form textarea {
+            resize: vertical;
+        }
+
+        form button {
             margin-top: 20px;
-        }
-
-        th,
-        td {
+            width: 100%;
             padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            font-size: 14px;
+            background: #2b7cff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
         }
 
-        th {
-            color: var(--muted);
-            font-size: 13px;
+        form button:hover {
+            background: #1d5fc9;
+        }
+
+        .mensagem {
+            text-align: center;
+            margin: 20px auto;
+            max-width: 500px;
+            color: green;
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Botão voltar -->
-    <div style="max-width:600px; margin:auto 0 20px 0; text-align:right;">
-        <a href="dashboard.php" style="
-        display:inline-block;
-        padding:8px 15px;
-        border-radius:10px;
-        background:linear-gradient(90deg,var(--purple-600),var(--purple-500));
-        color:white;
-        font-weight:600;
-        text-decoration:none;
-        transition:0.3s;
-    ">← Voltar ao Dashboard</a>
-    </div>
+    <header>
+        <a class="voltar" href="dashboard.php">← Voltar</a>
+        <h1>Cadastrar Ponto Turístico</h1>
+    </header>
 
-    <div class="container">
-        <h2>Cadastrar Ponto Turístico</h2>
-        <?php echo $msg; ?>
+    <?php if ($mensagem): ?>
+        <div class="mensagem"><?php echo htmlspecialchars($mensagem); ?></div>
+    <?php endif; ?>
 
-        <form method="POST" enctype="multipart/form-data">
-            <label>Nome:</label>
-            <input type="text" name="nome" required>
+    <form action="" method="post" enctype="multipart/form-data">
+        <label>Nome</label>
+        <input type="text" name="nome" required>
 
-            <label>Descrição:</label>
-            <textarea name="descricao" rows="4" required></textarea>
+        <label>Descrição</label>
+        <textarea name="descricao" rows="4"></textarea>
 
-            <label>Endereço:</label>
-            <input type="text" name="endereco">
+        <label>Endereço</label>
+        <input type="text" name="endereco">
 
-            <label>Categoria:</label>
-            <input type="text" name="categoria">
+        <label>Categoria</label>
+        <input type="text" name="categoria" required>
 
-            <label>Imagem:</label>
-            <input type="file" name="imagem">
+        <label>Imagens (até 6)</label>
+        <input type="file" name="imagens[]" accept="image/*" multiple>
 
-            <button type="submit" name="cadastrar">Cadastrar</button>
-        </form>
-
-        <h2 style="margin-top:40px;">Pontos Turísticos Cadastrados</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Descrição</th>
-                    <th>Endereço</th>
-                    <th>Categoria</th>
-                    <th>Imagem</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $res->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo $row['nome']; ?></td>
-                        <td><?php echo $row['descricao']; ?></td>
-                        <td><?php echo $row['endereco']; ?></td>
-                        <td><?php echo $row['categoria']; ?></td>
-                        <td><?php if ($row['imagem']) echo "<img src='uploads/" . $row['imagem'] . "' width='60'>"; ?></td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    </div>
+        <button type="submit">Cadastrar</button>
+    </form>
 
 </body>
 
